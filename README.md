@@ -3,7 +3,7 @@
 
 # provider-civo-controller
 
-Kubeform controller for [Terraform Civo Provider](https://github.com/equinix/terraform-provider-metal)
+Kubeform controller for [Terraform Civo Provider](https://github.com/civo/terraform-provider-civo)
 
 ## Installation
 
