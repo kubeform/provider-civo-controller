@@ -27,7 +27,7 @@ import (
 	"sync"
 	"time"
 
-	civo "github.com/equinix/terraform-provider-metal/metal"
+	civo "github.com/civo/terraform-provider-civo/civo"
 	"github.com/gobuffalo/flect"
 	auditlib "go.bytebuilders.dev/audit/lib"
 	arv1 "k8s.io/api/admissionregistration/v1"
@@ -39,35 +39,25 @@ import (
 	admissionregistrationv1 "k8s.io/client-go/kubernetes/typed/admissionregistration/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
-	bgpv1alpha1 "kubeform.dev/provider-civo-api/apis/bgp/v1alpha1"
-	connectionv1alpha1 "kubeform.dev/provider-civo-api/apis/connection/v1alpha1"
-	devicev1alpha1 "kubeform.dev/provider-civo-api/apis/device/v1alpha1"
-	gatewayv1alpha1 "kubeform.dev/provider-civo-api/apis/gateway/v1alpha1"
-	ipv1alpha1 "kubeform.dev/provider-civo-api/apis/ip/v1alpha1"
-	organizationv1alpha1 "kubeform.dev/provider-civo-api/apis/organization/v1alpha1"
-	portv1alpha1 "kubeform.dev/provider-civo-api/apis/port/v1alpha1"
-	projectv1alpha1 "kubeform.dev/provider-civo-api/apis/project/v1alpha1"
-	reservedv1alpha1 "kubeform.dev/provider-civo-api/apis/reserved/v1alpha1"
-	spotv1alpha1 "kubeform.dev/provider-civo-api/apis/spot/v1alpha1"
+	dnsv1alpha1 "kubeform.dev/provider-civo-api/apis/dns/v1alpha1"
+	firewallv1alpha1 "kubeform.dev/provider-civo-api/apis/firewall/v1alpha1"
+	instancev1alpha1 "kubeform.dev/provider-civo-api/apis/instance/v1alpha1"
+	kubernetesv1alpha1 "kubeform.dev/provider-civo-api/apis/kubernetes/v1alpha1"
+	loadbalancerv1alpha1 "kubeform.dev/provider-civo-api/apis/loadbalancer/v1alpha1"
+	networkv1alpha1 "kubeform.dev/provider-civo-api/apis/network/v1alpha1"
+	snapshotv1alpha1 "kubeform.dev/provider-civo-api/apis/snapshot/v1alpha1"
 	sshv1alpha1 "kubeform.dev/provider-civo-api/apis/ssh/v1alpha1"
-	userv1alpha1 "kubeform.dev/provider-civo-api/apis/user/v1alpha1"
-	virtualv1alpha1 "kubeform.dev/provider-civo-api/apis/virtual/v1alpha1"
-	vlanv1alpha1 "kubeform.dev/provider-civo-api/apis/vlan/v1alpha1"
+	templatev1alpha1 "kubeform.dev/provider-civo-api/apis/template/v1alpha1"
 	volumev1alpha1 "kubeform.dev/provider-civo-api/apis/volume/v1alpha1"
-	controllersbgp "kubeform.dev/provider-civo-controller/controllers/bgp"
-	controllersconnection "kubeform.dev/provider-civo-controller/controllers/connection"
-	controllersdevice "kubeform.dev/provider-civo-controller/controllers/device"
-	controllersgateway "kubeform.dev/provider-civo-controller/controllers/gateway"
-	controllersip "kubeform.dev/provider-civo-controller/controllers/ip"
-	controllersorganization "kubeform.dev/provider-civo-controller/controllers/organization"
-	controllersport "kubeform.dev/provider-civo-controller/controllers/port"
-	controllersproject "kubeform.dev/provider-civo-controller/controllers/project"
-	controllersreserved "kubeform.dev/provider-civo-controller/controllers/reserved"
-	controllersspot "kubeform.dev/provider-civo-controller/controllers/spot"
+	controllersdns "kubeform.dev/provider-civo-controller/controllers/dns"
+	controllersfirewall "kubeform.dev/provider-civo-controller/controllers/firewall"
+	controllersinstance "kubeform.dev/provider-civo-controller/controllers/instance"
+	controllerskubernetes "kubeform.dev/provider-civo-controller/controllers/kubernetes"
+	controllersloadbalancer "kubeform.dev/provider-civo-controller/controllers/loadbalancer"
+	controllersnetwork "kubeform.dev/provider-civo-controller/controllers/network"
+	controllerssnapshot "kubeform.dev/provider-civo-controller/controllers/snapshot"
 	controllersssh "kubeform.dev/provider-civo-controller/controllers/ssh"
-	controllersuser "kubeform.dev/provider-civo-controller/controllers/user"
-	controllersvirtual "kubeform.dev/provider-civo-controller/controllers/virtual"
-	controllersvlan "kubeform.dev/provider-civo-controller/controllers/vlan"
+	controllerstemplate "kubeform.dev/provider-civo-controller/controllers/template"
 	controllersvolume "kubeform.dev/provider-civo-controller/controllers/volume"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -253,237 +243,183 @@ func updateVWC(vwcClient *admissionregistrationv1.AdmissionregistrationV1Client,
 func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVersionKind, auditor *auditlib.EventPublisher, watchOnlyDefault bool) error {
 	switch gvk {
 	case schema.GroupVersionKind{
-		Group:   "bgp.civo.kubeform.com",
+		Group:   "dns.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Session",
+		Kind:    "DomainName",
 	}:
-		if err := (&controllersbgp.SessionReconciler{
+		if err := (&controllersdns.DomainNameReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Session"),
+			Log:              ctrl.Log.WithName("controllers").WithName("DomainName"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_bgp_session"],
-			TypeName:         "metal_bgp_session",
+			Resource:         civo.Provider().ResourcesMap["civo_dns_domain_name"],
+			TypeName:         "civo_dns_domain_name",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Session")
+			setupLog.Error(err, "unable to create controller", "controller", "DomainName")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "connection.civo.kubeform.com",
+		Group:   "dns.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Connection",
+		Kind:    "DomainRecord",
 	}:
-		if err := (&controllersconnection.ConnectionReconciler{
+		if err := (&controllersdns.DomainRecordReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Connection"),
+			Log:              ctrl.Log.WithName("controllers").WithName("DomainRecord"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_connection"],
-			TypeName:         "metal_connection",
+			Resource:         civo.Provider().ResourcesMap["civo_dns_domain_record"],
+			TypeName:         "civo_dns_domain_record",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Connection")
+			setupLog.Error(err, "unable to create controller", "controller", "DomainRecord")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "device.civo.kubeform.com",
+		Group:   "firewall.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Device",
+		Kind:    "Firewall",
 	}:
-		if err := (&controllersdevice.DeviceReconciler{
+		if err := (&controllersfirewall.FirewallReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Device"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Firewall"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_device"],
-			TypeName:         "metal_device",
+			Resource:         civo.Provider().ResourcesMap["civo_firewall"],
+			TypeName:         "civo_firewall",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Device")
+			setupLog.Error(err, "unable to create controller", "controller", "Firewall")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "device.civo.kubeform.com",
+		Group:   "firewall.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "NetworkType",
+		Kind:    "Rule",
 	}:
-		if err := (&controllersdevice.NetworkTypeReconciler{
+		if err := (&controllersfirewall.RuleReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("NetworkType"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Rule"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_device_network_type"],
-			TypeName:         "metal_device_network_type",
+			Resource:         civo.Provider().ResourcesMap["civo_firewall_rule"],
+			TypeName:         "civo_firewall_rule",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "NetworkType")
+			setupLog.Error(err, "unable to create controller", "controller", "Rule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "gateway.civo.kubeform.com",
+		Group:   "instance.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Gateway",
+		Kind:    "Instance",
 	}:
-		if err := (&controllersgateway.GatewayReconciler{
+		if err := (&controllersinstance.InstanceReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Gateway"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Instance"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_gateway"],
-			TypeName:         "metal_gateway",
+			Resource:         civo.Provider().ResourcesMap["civo_instance"],
+			TypeName:         "civo_instance",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Gateway")
+			setupLog.Error(err, "unable to create controller", "controller", "Instance")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "ip.civo.kubeform.com",
+		Group:   "kubernetes.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Attachment",
+		Kind:    "Cluster",
 	}:
-		if err := (&controllersip.AttachmentReconciler{
+		if err := (&controllerskubernetes.ClusterReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Attachment"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Cluster"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_ip_attachment"],
-			TypeName:         "metal_ip_attachment",
+			Resource:         civo.Provider().ResourcesMap["civo_kubernetes_cluster"],
+			TypeName:         "civo_kubernetes_cluster",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Attachment")
+			setupLog.Error(err, "unable to create controller", "controller", "Cluster")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "organization.civo.kubeform.com",
+		Group:   "kubernetes.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Organization",
+		Kind:    "NodePool",
 	}:
-		if err := (&controllersorganization.OrganizationReconciler{
+		if err := (&controllerskubernetes.NodePoolReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Organization"),
+			Log:              ctrl.Log.WithName("controllers").WithName("NodePool"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_organization"],
-			TypeName:         "metal_organization",
+			Resource:         civo.Provider().ResourcesMap["civo_kubernetes_node_pool"],
+			TypeName:         "civo_kubernetes_node_pool",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Organization")
+			setupLog.Error(err, "unable to create controller", "controller", "NodePool")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "port.civo.kubeform.com",
+		Group:   "loadbalancer.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "VlanAttachment",
+		Kind:    "Loadbalancer",
 	}:
-		if err := (&controllersport.VlanAttachmentReconciler{
+		if err := (&controllersloadbalancer.LoadbalancerReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("VlanAttachment"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Loadbalancer"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_port_vlan_attachment"],
-			TypeName:         "metal_port_vlan_attachment",
+			Resource:         civo.Provider().ResourcesMap["civo_loadbalancer"],
+			TypeName:         "civo_loadbalancer",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "VlanAttachment")
+			setupLog.Error(err, "unable to create controller", "controller", "Loadbalancer")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.civo.kubeform.com",
+		Group:   "network.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Project",
+		Kind:    "Network",
 	}:
-		if err := (&controllersproject.ProjectReconciler{
+		if err := (&controllersnetwork.NetworkReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Project"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Network"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_project"],
-			TypeName:         "metal_project",
+			Resource:         civo.Provider().ResourcesMap["civo_network"],
+			TypeName:         "civo_network",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Project")
+			setupLog.Error(err, "unable to create controller", "controller", "Network")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.civo.kubeform.com",
+		Group:   "snapshot.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "ApiKey",
+		Kind:    "Snapshot",
 	}:
-		if err := (&controllersproject.ApiKeyReconciler{
+		if err := (&controllerssnapshot.SnapshotReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ApiKey"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Snapshot"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_project_api_key"],
-			TypeName:         "metal_project_api_key",
+			Resource:         civo.Provider().ResourcesMap["civo_snapshot"],
+			TypeName:         "civo_snapshot",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "ApiKey")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "project.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "SshKey",
-	}:
-		if err := (&controllersproject.SshKeyReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("SshKey"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_project_ssh_key"],
-			TypeName:         "metal_project_ssh_key",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "SshKey")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "reserved.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "IpBlock",
-	}:
-		if err := (&controllersreserved.IpBlockReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("IpBlock"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_reserved_ip_block"],
-			TypeName:         "metal_reserved_ip_block",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "IpBlock")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "spot.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "MarketRequest",
-	}:
-		if err := (&controllersspot.MarketRequestReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("MarketRequest"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_spot_market_request"],
-			TypeName:         "metal_spot_market_request",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "MarketRequest")
+			setupLog.Error(err, "unable to create controller", "controller", "Snapshot")
 			return err
 		}
 	case schema.GroupVersionKind{
@@ -497,65 +433,29 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_ssh_key"],
-			TypeName:         "metal_ssh_key",
+			Resource:         civo.Provider().ResourcesMap["civo_ssh_key"],
+			TypeName:         "civo_ssh_key",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Key")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "user.civo.kubeform.com",
+		Group:   "template.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "ApiKey",
+		Kind:    "Template",
 	}:
-		if err := (&controllersuser.ApiKeyReconciler{
+		if err := (&controllerstemplate.TemplateReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ApiKey"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Template"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_user_api_key"],
-			TypeName:         "metal_user_api_key",
+			Resource:         civo.Provider().ResourcesMap["civo_template"],
+			TypeName:         "civo_template",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "ApiKey")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "virtual.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Circuit",
-	}:
-		if err := (&controllersvirtual.CircuitReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Circuit"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_virtual_circuit"],
-			TypeName:         "metal_virtual_circuit",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Circuit")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "vlan.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Vlan",
-	}:
-		if err := (&controllersvlan.VlanReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Vlan"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_vlan"],
-			TypeName:         "metal_vlan",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Vlan")
+			setupLog.Error(err, "unable to create controller", "controller", "Template")
 			return err
 		}
 	case schema.GroupVersionKind{
@@ -569,8 +469,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_volume"],
-			TypeName:         "metal_volume",
+			Resource:         civo.Provider().ResourcesMap["civo_volume"],
+			TypeName:         "civo_volume",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Volume")
@@ -587,8 +487,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["metal_volume_attachment"],
-			TypeName:         "metal_volume_attachment",
+			Resource:         civo.Provider().ResourcesMap["civo_volume_attachment"],
+			TypeName:         "civo_volume_attachment",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Attachment")
@@ -605,120 +505,93 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 func SetupWebhook(mgr manager.Manager, gvk schema.GroupVersionKind) error {
 	switch gvk {
 	case schema.GroupVersionKind{
-		Group:   "bgp.civo.kubeform.com",
+		Group:   "dns.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Session",
+		Kind:    "DomainName",
 	}:
-		if err := (&bgpv1alpha1.Session{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Session")
+		if err := (&dnsv1alpha1.DomainName{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DomainName")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "connection.civo.kubeform.com",
+		Group:   "dns.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Connection",
+		Kind:    "DomainRecord",
 	}:
-		if err := (&connectionv1alpha1.Connection{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Connection")
+		if err := (&dnsv1alpha1.DomainRecord{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DomainRecord")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "device.civo.kubeform.com",
+		Group:   "firewall.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Device",
+		Kind:    "Firewall",
 	}:
-		if err := (&devicev1alpha1.Device{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Device")
+		if err := (&firewallv1alpha1.Firewall{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Firewall")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "device.civo.kubeform.com",
+		Group:   "firewall.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "NetworkType",
+		Kind:    "Rule",
 	}:
-		if err := (&devicev1alpha1.NetworkType{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "NetworkType")
+		if err := (&firewallv1alpha1.Rule{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Rule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "gateway.civo.kubeform.com",
+		Group:   "instance.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Gateway",
+		Kind:    "Instance",
 	}:
-		if err := (&gatewayv1alpha1.Gateway{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Gateway")
+		if err := (&instancev1alpha1.Instance{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Instance")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "ip.civo.kubeform.com",
+		Group:   "kubernetes.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Attachment",
+		Kind:    "Cluster",
 	}:
-		if err := (&ipv1alpha1.Attachment{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Attachment")
+		if err := (&kubernetesv1alpha1.Cluster{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Cluster")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "organization.civo.kubeform.com",
+		Group:   "kubernetes.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Organization",
+		Kind:    "NodePool",
 	}:
-		if err := (&organizationv1alpha1.Organization{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Organization")
+		if err := (&kubernetesv1alpha1.NodePool{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "NodePool")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "port.civo.kubeform.com",
+		Group:   "loadbalancer.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "VlanAttachment",
+		Kind:    "Loadbalancer",
 	}:
-		if err := (&portv1alpha1.VlanAttachment{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "VlanAttachment")
+		if err := (&loadbalancerv1alpha1.Loadbalancer{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Loadbalancer")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.civo.kubeform.com",
+		Group:   "network.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Project",
+		Kind:    "Network",
 	}:
-		if err := (&projectv1alpha1.Project{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Project")
+		if err := (&networkv1alpha1.Network{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Network")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.civo.kubeform.com",
+		Group:   "snapshot.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "ApiKey",
+		Kind:    "Snapshot",
 	}:
-		if err := (&projectv1alpha1.ApiKey{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "ApiKey")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "project.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "SshKey",
-	}:
-		if err := (&projectv1alpha1.SshKey{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "SshKey")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "reserved.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "IpBlock",
-	}:
-		if err := (&reservedv1alpha1.IpBlock{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "IpBlock")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "spot.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "MarketRequest",
-	}:
-		if err := (&spotv1alpha1.MarketRequest{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "MarketRequest")
+		if err := (&snapshotv1alpha1.Snapshot{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Snapshot")
 			return err
 		}
 	case schema.GroupVersionKind{
@@ -731,30 +604,12 @@ func SetupWebhook(mgr manager.Manager, gvk schema.GroupVersionKind) error {
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "user.civo.kubeform.com",
+		Group:   "template.civo.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "ApiKey",
+		Kind:    "Template",
 	}:
-		if err := (&userv1alpha1.ApiKey{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "ApiKey")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "virtual.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Circuit",
-	}:
-		if err := (&virtualv1alpha1.Circuit{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Circuit")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "vlan.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Vlan",
-	}:
-		if err := (&vlanv1alpha1.Vlan{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Vlan")
+		if err := (&templatev1alpha1.Template{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Template")
 			return err
 		}
 	case schema.GroupVersionKind{
