@@ -63,6 +63,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
+var _provider = civo.Provider()
+
 var runningControllers = struct {
 	sync.RWMutex
 	mp map[schema.GroupVersionKind]bool
@@ -252,8 +254,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("DomainName"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_dns_domain_name"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_dns_domain_name"],
 			TypeName:         "civo_dns_domain_name",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -270,8 +272,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("DomainRecord"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_dns_domain_record"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_dns_domain_record"],
 			TypeName:         "civo_dns_domain_record",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -288,8 +290,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Firewall"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_firewall"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_firewall"],
 			TypeName:         "civo_firewall",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -306,8 +308,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Rule"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_firewall_rule"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_firewall_rule"],
 			TypeName:         "civo_firewall_rule",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -324,8 +326,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Instance"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_instance"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_instance"],
 			TypeName:         "civo_instance",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -342,8 +344,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Cluster"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_kubernetes_cluster"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_kubernetes_cluster"],
 			TypeName:         "civo_kubernetes_cluster",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -360,8 +362,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("NodePool"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_kubernetes_node_pool"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_kubernetes_node_pool"],
 			TypeName:         "civo_kubernetes_node_pool",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -378,8 +380,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Loadbalancer"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_loadbalancer"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_loadbalancer"],
 			TypeName:         "civo_loadbalancer",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -396,8 +398,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Network"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_network"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_network"],
 			TypeName:         "civo_network",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -414,8 +416,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Snapshot"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_snapshot"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_snapshot"],
 			TypeName:         "civo_snapshot",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -432,8 +434,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Key"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_ssh_key"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_ssh_key"],
 			TypeName:         "civo_ssh_key",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -450,8 +452,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Template"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_template"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_template"],
 			TypeName:         "civo_template",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -468,8 +470,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Volume"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_volume"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_volume"],
 			TypeName:         "civo_volume",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -486,8 +488,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Attachment"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         civo.Provider(),
-			Resource:         civo.Provider().ResourcesMap["civo_volume_attachment"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["civo_volume_attachment"],
 			TypeName:         "civo_volume_attachment",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
