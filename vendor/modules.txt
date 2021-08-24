@@ -123,9 +123,6 @@ github.com/fatih/structs
 github.com/form3tech-oss/jwt-go
 # github.com/fsnotify/fsnotify v1.4.9
 github.com/fsnotify/fsnotify
-# github.com/go-errors/errors v1.0.1
-## explicit
-github.com/go-errors/errors
 # github.com/go-logr/logr v0.4.0
 ## explicit
 github.com/go-logr/logr
@@ -1099,10 +1096,11 @@ kmodules.xyz/resource-metadata/hub
 kmodules.xyz/resource-metadata/hub/resourceclasses
 kmodules.xyz/resource-metadata/hub/resourcedescriptors
 kmodules.xyz/resource-metadata/pkg/graph
-# kubeform.dev/apimachinery v0.0.0-20210629153539-7bcd34a30eb5
+# kubeform.dev/apimachinery v0.0.0-20210824104859-ba5604d5a1cc
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
-# kubeform.dev/provider-civo-api v0.3.1-0.20210824075659-cfbbf8d33493
+kubeform.dev/apimachinery/pkg/util
+# kubeform.dev/provider-civo-api v0.3.1-0.20210824193521-c58bd3a63f59
 ## explicit
 kubeform.dev/provider-civo-api/api/provider
 kubeform.dev/provider-civo-api/apis/dns
@@ -1126,7 +1124,6 @@ kubeform.dev/provider-civo-api/apis/template/v1alpha1
 kubeform.dev/provider-civo-api/apis/volume
 kubeform.dev/provider-civo-api/apis/volume/v1alpha1
 kubeform.dev/provider-civo-api/client/clientset/versioned/scheme
-kubeform.dev/provider-civo-api/util
 # sigs.k8s.io/cli-utils v0.25.0
 ## explicit
 sigs.k8s.io/cli-utils/pkg/kstatus/status
