@@ -1100,7 +1100,7 @@ kmodules.xyz/resource-metadata/pkg/graph
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
 kubeform.dev/apimachinery/pkg/util
-# kubeform.dev/provider-civo-api v0.3.1-0.20210824193521-c58bd3a63f59
+# kubeform.dev/provider-civo-api v0.3.1-0.20210824194534-d319d7705dc4
 ## explicit
 kubeform.dev/provider-civo-api/api/provider
 kubeform.dev/provider-civo-api/apis/dns
