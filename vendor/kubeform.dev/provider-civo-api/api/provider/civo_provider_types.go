@@ -19,8 +19,10 @@ limitations under the License.
 package provider
 
 type CivoSpec struct {
+	// If region is not set, then no region will be used and them you need expensify in every resource even if you expensify here you can overwrite in a resource.
 	// +optional
 	Region *string `json:"region,omitempty" tf:"region"`
+	// This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.
 	// +optional
 	Token *string `json:"token,omitempty" tf:"token"`
 }

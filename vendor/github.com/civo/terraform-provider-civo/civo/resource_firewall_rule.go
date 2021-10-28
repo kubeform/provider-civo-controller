@@ -14,21 +14,22 @@ import (
 // this resource don't have an update option because the backend don't have the
 // support for that, so in this case we use ForceNew for all object in the resource
 func resourceFirewallRule() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo firewall rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because Civo backend doesn't support it at this moment. In that case, we use `ForceNew` for all object in the resource.",
 		Schema: map[string]*schema.Schema{
 			"firewall_id": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: utils.ValidateName,
+				Description:  "The Firewall ID",
 			},
 			"protocol": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "The protocol choice from tcp, udp or icmp (the default if unspecified is tcp)",
+				Description: "The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)",
 				ValidateFunc: validation.StringInSlice([]string{
 					"tcp",
 					"udp",
@@ -53,10 +54,9 @@ func resourceFirewallRule() *schema.Resource {
 			},
 			"cidr": {
 				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
+				Required:    true,
 				ForceNew:    true,
-				Description: "The IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (defaults to being globally applied, i.e. 0.0.0.0/0)",
+				Description: "The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"direction": {
@@ -64,7 +64,7 @@ func resourceFirewallRule() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "Will this rule affect ingress traffic",
+				Description: "Will this rule affect ingress traffic (only `ingress` is supported now)",
 				ValidateFunc: validation.StringInSlice([]string{
 					"ingress",
 				}, false),
@@ -74,7 +74,7 @@ func resourceFirewallRule() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				Description:  "A string that will be the displayed name/reference for this rule (optional)",
+				Description:  "A string that will be the displayed name/reference for this rule",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"region": {
@@ -110,12 +110,17 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 		cird[i] = tfCird.(string)
 	}
 
+	direction := d.Get("direction").(string)
+	if direction == "" {
+		direction = "ingress"
+	}
+
 	log.Printf("[INFO] configuring a new firewall rule for firewall %s", d.Get("firewall_id").(string))
 	config := &civogo.FirewallRuleConfig{
 		FirewallID: d.Get("firewall_id").(string),
 		Protocol:   d.Get("protocol").(string),
 		StartPort:  d.Get("start_port").(string),
-		Direction:  d.Get("direction").(string),
+		Direction:  direction,
 		Cidr:       cird,
 	}
 
@@ -127,15 +132,13 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 		config.Label = attr.(string)
 	}
 
-	log.Printf("[INFO] Config: %+v", config)
-
-	log.Printf("[INFO] creating a new firewall rule for firewall %s", d.Get("firewall_id").(string))
+	log.Printf("[INFO] Creating a new firewall rule for firewall %s with config: %+v", d.Get("firewall_id").(string), config)
 	firewallRule, err := apiClient.NewFirewallRule(config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
+		return fmt.Errorf("[ERR] failed to create a new firewall rule: %s", err)
 	}
 
-	log.Printf("[INFO] RuleID: %s", firewallRule.ID)
+	log.Printf("[INFO] Firewall rule created with ID: %s", firewallRule.ID)
 
 	d.SetId(firewallRule.ID)
 
@@ -151,10 +154,8 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 		apiClient.Region = region.(string)
 	}
 
-	log.Printf("[INFO] firewallID: %s", d.Get("firewall_id").(string))
-	log.Printf("[INFO] RuleID: %s", d.Id())
+	log.Printf("[INFO] Reading firewall rule %s from firewall %s", d.Id(), d.Get("firewall_id").(string))
 
-	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	resp, err := apiClient.FindFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
 		if resp == nil {
@@ -165,7 +166,7 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("[ERR] error retrieving firewall rule: %s", err)
 	}
 
-	log.Printf("[INFO] rules %+v", resp)
+	log.Printf("[INFO] Rules response: %+v", resp)
 
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("protocol", resp.Protocol)
@@ -194,7 +195,7 @@ func resourceFirewallRuleDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	_, err := apiClient.DeleteFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete firewall rule %s", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete firewall rule %s - %v", d.Id(), err)
 	}
 	return nil
 }

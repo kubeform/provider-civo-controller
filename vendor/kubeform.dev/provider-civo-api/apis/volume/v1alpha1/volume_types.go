@@ -58,15 +58,14 @@ type VolumeSpec struct {
 type VolumeSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
-	// Mark the volume as bootable
-	Bootable *bool `json:"bootable" tf:"bootable"`
-	// +optional
-	CreatedAt *string `json:"createdAt,omitempty" tf:"created_at"`
+	// The mount point of the volume (from instance's perspective)
 	// +optional
 	MountPoint *string `json:"mountPoint,omitempty" tf:"mount_point"`
 	// A name that you wish to use to refer to this volume
 	Name *string `json:"name" tf:"name"`
-	// The region for the volume
+	// The network that the volume belongs to
+	NetworkID *string `json:"networkID" tf:"network_id"`
+	// The region for the volume, if not declare we use the region in declared in the provider.
 	// +optional
 	Region *string `json:"region,omitempty" tf:"region"`
 	// A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes

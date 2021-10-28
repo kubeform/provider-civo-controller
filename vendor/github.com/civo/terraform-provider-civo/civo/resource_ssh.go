@@ -11,8 +11,8 @@ import (
 
 // Ssh resource, with this we can create and manage all Snapshot
 func resourceSSHKey() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo SSH key resource to allow you to manage SSH keys for instance access. Keys created with this resource can be referenced in your instance configuration via their ID.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -24,9 +24,9 @@ func resourceSSHKey() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "a string containing the SSH public key.",
-				Sensitive:   true,
 				ForceNew:    true,
 			},
+			// Computed resource
 			"fingerprint": {
 				Type:        schema.TypeString,
 				Computed:    true,

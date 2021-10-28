@@ -58,9 +58,10 @@ type DomainNameSpec struct {
 type DomainNameSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// The account ID of the domain
 	// +optional
 	AccountID *string `json:"accountID,omitempty" tf:"account_id"`
-	// A fully qualified domain name
+	// The name of the domain
 	Name *string `json:"name" tf:"name"`
 }
 

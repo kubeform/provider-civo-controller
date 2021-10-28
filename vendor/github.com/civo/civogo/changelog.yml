@@ -1,3 +1,83 @@
+- semver: 0.2.52
+  date: 2021-08-30T17:14:48.6307+08:00
+  packager: ""
+  changes:
+  - commit: d69977c64e9f3f1d6157a803959f9080604719ec
+    note: |-
+      Add new struct fields for cluster firewall (#60)
+
+      * Add new struct fields for cluster firewall
+
+      * Add firewall ID to Kubernetes cluster response struct
+
+      * Update KubernetesClusterConfig struct to match with latest create cluster API
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 6f7d2d147b622a300b893e827763ddd1f112172d
+    note: Update the changelog
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+- semver: 0.2.51
+  date: 2021-08-20T12:14:51.369192+01:00
+  packager: ""
+  changes:
+  - commit: 63eb8ecec32ae5be6e9f6d0ceb2c13b16d1bb267
+    note: Add firewall ID to instance config (for creating instance) (#59)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+- semver: 0.2.50
+  date: 2021-08-20T12:23:36.242834+08:00
+  packager: ""
+  changes:
+  - commit: 4a2e2643ca1789e4872237e0835846aaa665ac5c
+    note: |-
+      Exclude disk images with name containing "k3s" (#58)
+
+      * Exclude disk images with name containing "k3s"
+
+      * Update test for list disk images
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 51b3d43babc815cc240d6c99501db78a4c378050
+    note: Fix lint issues
+    author:
+      name: Andy Jeffries
+      email: andy@andyjeffries.co.uk
+    committer:
+      name: Andy Jeffries
+      email: andy@andyjeffries.co.uk
+  - commit: cd1195dfa60d57e1da591963430e0c09f2df95dd
+    note: Fixing capitalisation of decodeERROR to go standards and UnknowError typo
+    author:
+      name: Andy Jeffries
+      email: andy@andyjeffries.co.uk
+    committer:
+      name: Andy Jeffries
+      email: andy@andyjeffries.co.uk
+  - commit: e0bec13da9a80fa3918a011714ced02afd539c55
+    note: Add endpoints for team/permission management
+    author:
+      name: Andy Jeffries
+      email: andy@andyjeffries.co.uk
+    committer:
+      name: Andy Jeffries
+      email: andy@andyjeffries.co.uk
 - semver: 0.2.49
   date: 2021-07-16T12:30:09.316057+01:00
   packager: ""

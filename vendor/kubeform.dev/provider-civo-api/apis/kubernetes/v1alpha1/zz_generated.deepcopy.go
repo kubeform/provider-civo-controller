@@ -98,6 +98,11 @@ func (in *ClusterSpec) DeepCopyInto(out *ClusterSpec) {
 	}
 	in.Resource.DeepCopyInto(&out.Resource)
 	out.ProviderRef = in.ProviderRef
+	if in.SecretRef != nil {
+		in, out := &in.SecretRef, &out.SecretRef
+		*out = new(v1.LocalObjectReference)
+		**out = **in
+	}
 	if in.BackendRef != nil {
 		in, out := &in.BackendRef, &out.BackendRef
 		*out = new(v1.LocalObjectReference)
@@ -211,11 +216,6 @@ func (in *ClusterSpecPools) DeepCopyInto(out *ClusterSpecPools) {
 		*out = new(int64)
 		**out = **in
 	}
-	if in.ID != nil {
-		in, out := &in.ID, &out.ID
-		*out = new(string)
-		**out = **in
-	}
 	if in.InstanceNames != nil {
 		in, out := &in.InstanceNames, &out.InstanceNames
 		*out = make([]string, len(*in))
@@ -317,6 +317,11 @@ func (in *ClusterSpecResource) DeepCopyInto(out *ClusterSpecResource) {
 	}
 	if in.DnsEntry != nil {
 		in, out := &in.DnsEntry, &out.DnsEntry
+		*out = new(string)
+		**out = **in
+	}
+	if in.FirewallID != nil {
+		in, out := &in.FirewallID, &out.FirewallID
 		*out = new(string)
 		**out = **in
 	}

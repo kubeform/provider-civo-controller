@@ -20,17 +20,18 @@ import (
 // Kubernetes Cluster resource, with this you can manage all cluster from terraform
 func resourceKubernetesClusterNodePool() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides a Civo Kubernetes node pool resource. While the default node pool must be defined in the `civo_kubernetes_cluster` resource, this resource can be used to add additional ones to a cluster.",
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "The id of your cluster (required)",
+				Description:  "The ID of your cluster",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"region": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "The region of the node pool, has to match that of the cluster (required)",
+				Description:  "The region of the node pool, has to match that of the cluster",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"num_target_nodes": {
@@ -43,7 +44,7 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "the size of each node (optional, the default is currently g2.k3s.medium)",
+				Description: "the size of each node (optional, the default is currently g3.k3s.medium)",
 			},
 		},
 		Create: resourceKubernetesClusterNodePoolCreate,
@@ -212,26 +213,44 @@ func resourceKubernetesClusterNodePoolDelete(d *schema.ResourceData, m interface
 // custom import to able to add a node pool to the terraform
 func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
+	regions, err := apiClient.ListRegions()
+	if err != nil {
+		return nil, err
+	}
 
 	clusterID, nodePoolID, err := utils.ResourceCommonParseID(d.Id())
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[INFO] retriving the node pool %s", nodePoolID)
-	resp, err := apiClient.GetKubernetesCluster(clusterID)
-	if err != nil {
-		if resp != nil {
-			return nil, err
+	poolFound := false
+	for _, region := range regions {
+		if poolFound {
+			break
+		}
+
+		currentRegionCode := region.Code
+		apiClient.Region = currentRegionCode
+		log.Printf("[INFO] Retriving the node pool %s from region %s", nodePoolID, currentRegionCode)
+		resp, err := apiClient.GetKubernetesCluster(clusterID)
+		if err != nil {
+			continue // move on and find in another region
+		}
+
+		for _, v := range resp.Pools {
+			if v.ID == nodePoolID {
+				poolFound = true
+				d.SetId(v.ID)
+				d.Set("cluster_id", resp.ID)
+				d.Set("region", currentRegionCode)
+				d.Set("num_target_nodes", v.Count)
+				d.Set("target_nodes_size", v.Size)
+			}
 		}
 	}
 
-	d.Set("cluster_id", resp.ID)
-	for _, v := range resp.Pools {
-		if v.ID == nodePoolID {
-			d.Set("num_target_nodes", v.Count)
-			d.Set("target_nodes_size", v.Size)
-		}
+	if !poolFound {
+		return nil, fmt.Errorf("[ERR] Node pool %s not found", nodePoolID)
 	}
 
 	return []*schema.ResourceData{d}, nil

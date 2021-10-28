@@ -25,11 +25,8 @@ import (
 	firewallv1alpha1 "kubeform.dev/provider-civo-api/apis/firewall/v1alpha1"
 	instancev1alpha1 "kubeform.dev/provider-civo-api/apis/instance/v1alpha1"
 	kubernetesv1alpha1 "kubeform.dev/provider-civo-api/apis/kubernetes/v1alpha1"
-	loadbalancerv1alpha1 "kubeform.dev/provider-civo-api/apis/loadbalancer/v1alpha1"
 	networkv1alpha1 "kubeform.dev/provider-civo-api/apis/network/v1alpha1"
-	snapshotv1alpha1 "kubeform.dev/provider-civo-api/apis/snapshot/v1alpha1"
 	sshv1alpha1 "kubeform.dev/provider-civo-api/apis/ssh/v1alpha1"
-	templatev1alpha1 "kubeform.dev/provider-civo-api/apis/template/v1alpha1"
 	volumev1alpha1 "kubeform.dev/provider-civo-api/apis/volume/v1alpha1"
 	"kubeform.dev/provider-civo-controller/controllers"
 )
@@ -98,14 +95,6 @@ var (
 			ResourceType: "civo_kubernetes_node_pool",
 		},
 		{
-			Group:    "loadbalancer.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "loadbalancers",
-		}: {
-			JsonIt:       controllers.GetJSONItr(loadbalancerv1alpha1.GetEncoder(), loadbalancerv1alpha1.GetDecoder()),
-			ResourceType: "civo_loadbalancer",
-		},
-		{
 			Group:    "network.civo.kubeform.com",
 			Version:  "v1alpha1",
 			Resource: "networks",
@@ -114,28 +103,12 @@ var (
 			ResourceType: "civo_network",
 		},
 		{
-			Group:    "snapshot.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "snapshots",
-		}: {
-			JsonIt:       controllers.GetJSONItr(snapshotv1alpha1.GetEncoder(), snapshotv1alpha1.GetDecoder()),
-			ResourceType: "civo_snapshot",
-		},
-		{
 			Group:    "ssh.civo.kubeform.com",
 			Version:  "v1alpha1",
 			Resource: "keys",
 		}: {
 			JsonIt:       controllers.GetJSONItr(sshv1alpha1.GetEncoder(), sshv1alpha1.GetDecoder()),
 			ResourceType: "civo_ssh_key",
-		},
-		{
-			Group:    "template.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "templates",
-		}: {
-			JsonIt:       controllers.GetJSONItr(templatev1alpha1.GetEncoder(), templatev1alpha1.GetDecoder()),
-			ResourceType: "civo_template",
 		},
 		{
 			Group:    "volume.civo.kubeform.com",

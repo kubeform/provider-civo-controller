@@ -58,9 +58,12 @@ type FirewallSpec struct {
 type FirewallSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// The firewall name
 	Name *string `json:"name" tf:"name"`
+	// The firewall network, if is not defined we use the default network
 	// +optional
 	NetworkID *string `json:"networkID,omitempty" tf:"network_id"`
+	// The firewall region, if is not defined we use the global defined in the provider
 	// +optional
 	Region *string `json:"region,omitempty" tf:"region"`
 }

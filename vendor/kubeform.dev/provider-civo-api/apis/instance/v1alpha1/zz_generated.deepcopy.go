@@ -98,6 +98,11 @@ func (in *InstanceSpec) DeepCopyInto(out *InstanceSpec) {
 	}
 	in.Resource.DeepCopyInto(&out.Resource)
 	out.ProviderRef = in.ProviderRef
+	if in.SecretRef != nil {
+		in, out := &in.SecretRef, &out.SecretRef
+		*out = new(v1.LocalObjectReference)
+		**out = **in
+	}
 	if in.BackendRef != nil {
 		in, out := &in.BackendRef, &out.BackendRef
 		*out = new(v1.LocalObjectReference)
@@ -134,6 +139,11 @@ func (in *InstanceSpecResource) DeepCopyInto(out *InstanceSpecResource) {
 		*out = new(int64)
 		**out = **in
 	}
+	if in.DiskImage != nil {
+		in, out := &in.DiskImage, &out.DiskImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.FirewallID != nil {
 		in, out := &in.FirewallID, &out.FirewallID
 		*out = new(string)
@@ -166,11 +176,6 @@ func (in *InstanceSpecResource) DeepCopyInto(out *InstanceSpecResource) {
 	}
 	if in.PrivateIP != nil {
 		in, out := &in.PrivateIP, &out.PrivateIP
-		*out = new(string)
-		**out = **in
-	}
-	if in.PseudoIP != nil {
-		in, out := &in.PseudoIP, &out.PseudoIP
 		*out = new(string)
 		**out = **in
 	}

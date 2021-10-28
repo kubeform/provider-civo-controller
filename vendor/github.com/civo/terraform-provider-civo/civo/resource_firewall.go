@@ -11,22 +11,25 @@ import (
 
 // Firewall resource with this we can create and manage all firewall
 func resourceFirewall() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo firewall resource. This can be used to create, modify, and delete firewalls.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: utils.ValidateName,
+				Description:  "The firewall name",
 			},
 			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The firewall region, if is not defined we use the global defined in the provider",
 			},
 			"network_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The firewall network, if is not defined we use the default network",
 			},
 		},
 		Create: resourceFirewallCreate,
@@ -44,8 +47,9 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 	networkID := ""
 
-	if attr, ok := d.GetOk("region"); ok {
-		apiClient.Region = attr.(string)
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
 	}
 
 	if attr, ok := d.GetOk("network_id"); ok {
@@ -73,6 +77,11 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] retriving the firewall %s", d.Id())
 	resp, err := apiClient.FindFirewall(d.Id())
 	if err != nil {
@@ -94,6 +103,11 @@ func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	if d.HasChange("name") {
 		if d.Get("name").(string) != "" {
 			firewall := civogo.FirewallConfig{
@@ -114,10 +128,23 @@ func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	log.Printf("[INFO] deleting the firewall %s", d.Id())
-	_, err := apiClient.DeleteFirewall(d.Id())
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
+	firewallID := d.Id()
+	log.Printf("[INFO] Checking if firewall %s exists", firewallID)
+	_, err := apiClient.FindFirewall(firewallID)
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete the firewall %s, %s", d.Id(), err)
+		log.Printf("[INFO] Unable to find firewall %s - probably it's been deleted", firewallID)
+		return nil
+	}
+
+	log.Printf("[INFO] deleting the firewall %s", firewallID)
+	_, err = apiClient.DeleteFirewall(firewallID)
+	if err != nil {
+		return fmt.Errorf("[ERR] an error occurred while tring to delete the firewall %s, %s", firewallID, err)
 	}
 	return nil
 }

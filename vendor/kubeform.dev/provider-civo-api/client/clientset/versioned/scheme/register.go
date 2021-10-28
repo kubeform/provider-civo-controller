@@ -23,11 +23,8 @@ import (
 	firewallv1alpha1 "kubeform.dev/provider-civo-api/apis/firewall/v1alpha1"
 	instancev1alpha1 "kubeform.dev/provider-civo-api/apis/instance/v1alpha1"
 	kubernetesv1alpha1 "kubeform.dev/provider-civo-api/apis/kubernetes/v1alpha1"
-	loadbalancerv1alpha1 "kubeform.dev/provider-civo-api/apis/loadbalancer/v1alpha1"
 	networkv1alpha1 "kubeform.dev/provider-civo-api/apis/network/v1alpha1"
-	snapshotv1alpha1 "kubeform.dev/provider-civo-api/apis/snapshot/v1alpha1"
 	sshv1alpha1 "kubeform.dev/provider-civo-api/apis/ssh/v1alpha1"
-	templatev1alpha1 "kubeform.dev/provider-civo-api/apis/template/v1alpha1"
 	volumev1alpha1 "kubeform.dev/provider-civo-api/apis/volume/v1alpha1"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -45,11 +42,8 @@ var localSchemeBuilder = runtime.SchemeBuilder{
 	firewallv1alpha1.AddToScheme,
 	instancev1alpha1.AddToScheme,
 	kubernetesv1alpha1.AddToScheme,
-	loadbalancerv1alpha1.AddToScheme,
 	networkv1alpha1.AddToScheme,
-	snapshotv1alpha1.AddToScheme,
 	sshv1alpha1.AddToScheme,
-	templatev1alpha1.AddToScheme,
 	volumev1alpha1.AddToScheme,
 }
 
