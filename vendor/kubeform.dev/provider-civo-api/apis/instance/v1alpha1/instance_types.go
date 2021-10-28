@@ -52,26 +52,35 @@ type InstanceSpec struct {
 
 	ProviderRef core.LocalObjectReference `json:"providerRef" tf:"-"`
 
+	SecretRef *core.LocalObjectReference `json:"secretRef,omitempty" tf:"-"`
+
 	BackendRef *core.LocalObjectReference `json:"backendRef,omitempty" tf:"-"`
 }
 
 type InstanceSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// Instance's CPU cores
 	// +optional
 	CpuCores *int64 `json:"cpuCores,omitempty" tf:"cpu_cores"`
+	// Timestamp when the instance was created
 	// +optional
 	CreatedAt *string `json:"createdAt,omitempty" tf:"created_at"`
+	// Instance's disk (GB)
 	// +optional
 	DiskGb *int64 `json:"diskGb,omitempty" tf:"disk_gb"`
+	// The ID for the disk image to use to build the instance
+	// +optional
+	DiskImage *string `json:"diskImage,omitempty" tf:"disk_image"`
 	// The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)
 	// +optional
 	FirewallID *string `json:"firewallID,omitempty" tf:"firewall_id"`
-	// A fully qualified domain name that should be set as the instance's hostname (required)
+	// A fully qualified domain name that should be set as the instance's hostname
 	// +optional
 	Hostname *string `json:"hostname,omitempty" tf:"hostname"`
+	// Initial password for login
 	// +optional
-	InitialPassword *string `json:"initialPassword,omitempty" tf:"initial_password"`
+	InitialPassword *string `json:"-" sensitive:"true" tf:"initial_password"`
 	// The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)
 	// +optional
 	InitialUser *string `json:"initialUser,omitempty" tf:"initial_user"`
@@ -81,15 +90,16 @@ type InstanceSpecResource struct {
 	// Add some notes to the instance
 	// +optional
 	Notes *string `json:"notes,omitempty" tf:"notes"`
+	// Instance's private IP address
 	// +optional
 	PrivateIP *string `json:"privateIP,omitempty" tf:"private_ip"`
-	// +optional
-	PseudoIP *string `json:"pseudoIP,omitempty" tf:"pseudo_ip"`
+	// Instance's public IP address
 	// +optional
 	PublicIP *string `json:"publicIP,omitempty" tf:"public_ip"`
-	// This should be either none, create or `move_ip_from:intances_id` by default is create
+	// This should be either 'none' or 'create' (default: 'create')
 	// +optional
 	PublicIPRequired *string `json:"publicIPRequired,omitempty" tf:"public_ip_required"`
+	// Instance's RAM (MB)
 	// +optional
 	RamMb *int64 `json:"ramMb,omitempty" tf:"ram_mb"`
 	// The region for the instance, if not declare we use the region in declared in the provider
@@ -98,19 +108,22 @@ type InstanceSpecResource struct {
 	// A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified)
 	// +optional
 	ReverseDNS *string `json:"reverseDNS,omitempty" tf:"reverse_dns"`
-	// the contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, read/write/executable only by root and then will be executed at the end of the cloud initialization
+	// The contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, read/write/executable only by root and then will be executed at the end of the cloud initialization
 	// +optional
 	Script *string `json:"script,omitempty" tf:"script"`
-	// The name of the size, from the current list, e.g. g2.small (required)
+	// The name of the size, from the current list, e.g. g3.xsmall
 	// +optional
 	Size *string `json:"size,omitempty" tf:"size"`
+	// Instance's source ID
 	// +optional
 	SourceID *string `json:"sourceID,omitempty" tf:"source_id"`
+	// Instance's source type
 	// +optional
 	SourceType *string `json:"sourceType,omitempty" tf:"source_type"`
 	// The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)
 	// +optional
 	SshkeyID *string `json:"sshkeyID,omitempty" tf:"sshkey_id"`
+	// Instance's status
 	// +optional
 	Status *string `json:"status,omitempty" tf:"status"`
 	// An optional list of tags, represented as a key, value pair
@@ -118,6 +131,7 @@ type InstanceSpecResource struct {
 	Tags []string `json:"tags,omitempty" tf:"tags"`
 	// The ID for the template to use to build the instance
 	// +optional
+	// Deprecated
 	Template *string `json:"template,omitempty" tf:"template"`
 }
 

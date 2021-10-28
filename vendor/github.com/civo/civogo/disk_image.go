@@ -22,7 +22,7 @@ type DiskImage struct {
 func (c *Client) ListDiskImages() ([]DiskImage, error) {
 	resp, err := c.SendGetRequest("/v2/disk_images")
 	if err != nil {
-		return nil, decodeERROR(err)
+		return nil, decodeError(err)
 	}
 
 	diskImages := make([]DiskImage, 0)
@@ -30,14 +30,21 @@ func (c *Client) ListDiskImages() ([]DiskImage, error) {
 		return nil, err
 	}
 
-	return diskImages, nil
+	filteredDiskImages := make([]DiskImage, 0)
+	for _, diskImage := range diskImages {
+		if !strings.Contains(diskImage.Name, "k3s") {
+			filteredDiskImages = append(filteredDiskImages, diskImage)
+		}
+	}
+
+	return filteredDiskImages, nil
 }
 
 // GetDiskImage get one disk image using the id
 func (c *Client) GetDiskImage(id string) (*DiskImage, error) {
 	resp, err := c.SendGetRequest(fmt.Sprintf("/v2/disk_images/%s", id))
 	if err != nil {
-		return nil, decodeERROR(err)
+		return nil, decodeError(err)
 	}
 
 	diskImage := &DiskImage{}
@@ -52,7 +59,7 @@ func (c *Client) GetDiskImage(id string) (*DiskImage, error) {
 func (c *Client) FindDiskImage(search string) (*DiskImage, error) {
 	templateList, err := c.ListDiskImages()
 	if err != nil {
-		return nil, decodeERROR(err)
+		return nil, decodeError(err)
 	}
 
 	exactMatch := false

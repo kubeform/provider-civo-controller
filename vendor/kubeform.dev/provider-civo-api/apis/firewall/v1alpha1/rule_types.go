@@ -58,20 +58,20 @@ type RuleSpec struct {
 type RuleSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
-	// The IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (defaults to being globally applied, i.e. 0.0.0.0/0)
-	// +optional
-	Cidr []string `json:"cidr,omitempty" tf:"cidr"`
-	// Will this rule affect ingress traffic
+	// The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
+	Cidr []string `json:"cidr" tf:"cidr"`
+	// Will this rule affect ingress traffic (only `ingress` is supported now)
 	// +optional
 	Direction *string `json:"direction,omitempty" tf:"direction"`
 	// The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)
 	// +optional
-	EndPort    *string `json:"endPort,omitempty" tf:"end_port"`
+	EndPort *string `json:"endPort,omitempty" tf:"end_port"`
+	// The Firewall ID
 	FirewallID *string `json:"firewallID" tf:"firewall_id"`
-	// A string that will be the displayed name/reference for this rule (optional)
+	// A string that will be the displayed name/reference for this rule
 	// +optional
 	Label *string `json:"label,omitempty" tf:"label"`
-	// The protocol choice from tcp, udp or icmp (the default if unspecified is tcp)
+	// The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)
 	// +optional
 	Protocol *string `json:"protocol,omitempty" tf:"protocol"`
 	// The region for this rule

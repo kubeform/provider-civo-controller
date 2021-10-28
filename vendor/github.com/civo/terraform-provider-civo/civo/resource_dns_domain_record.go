@@ -2,23 +2,24 @@ package civo
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"strings"
 )
 
 // DNS domain record resource with this we can create and manage DNS Domain
 func resourceDNSDomainRecord() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo DNS domain record resource.",
 		Schema: map[string]*schema.Schema{
 			"domain_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Id from domain name",
+				Description: "ID from domain name",
 			},
 			"type": {
 				Type:        schema.TypeString,
@@ -57,16 +58,19 @@ func resourceDNSDomainRecord() *schema.Resource {
 			},
 			// Computed resource
 			"account_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The account ID of this resource",
 			},
 			"created_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Timestamp when this resource was created",
 			},
 			"updated_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Timestamp when this resource was updated",
 			},
 		},
 		Create: resourceDNSDomainRecordCreate,

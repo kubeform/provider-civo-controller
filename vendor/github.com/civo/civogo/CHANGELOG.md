@@ -1,4 +1,26 @@
 
+0.2.52
+=============
+2021-08-30
+
+* Add new struct fields for cluster firewall (#60) (d69977c6)
+* Update the changelog (6f7d2d14)
+
+0.2.51
+=============
+2021-08-20
+
+* Add firewall ID to instance config (for creating instance) (#59) (63eb8ece)
+
+0.2.50
+=============
+2021-08-20
+
+* Exclude disk images with name containing "k3s" (#58) (4a2e2643)
+* Fix lint issues (51b3d43b)
+* Fixing capitalisation of decodeERROR to go standards and UnknowError typo (cd1195df)
+* Add endpoints for team/permission management (e0bec13d)
+
 0.2.49
 =============
 2021-07-16

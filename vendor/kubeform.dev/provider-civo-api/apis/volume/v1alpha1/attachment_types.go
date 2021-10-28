@@ -58,8 +58,13 @@ type AttachmentSpec struct {
 type AttachmentSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// The ID of target instance for attachment
 	InstanceID *string `json:"instanceID" tf:"instance_id"`
-	VolumeID   *string `json:"volumeID" tf:"volume_id"`
+	// The region for the volume attachment
+	// +optional
+	Region *string `json:"region,omitempty" tf:"region"`
+	// The ID of target volume for attachment
+	VolumeID *string `json:"volumeID" tf:"volume_id"`
 }
 
 type AttachmentStatus struct {

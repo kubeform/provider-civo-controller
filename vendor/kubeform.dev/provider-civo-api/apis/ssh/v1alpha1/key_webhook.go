@@ -41,7 +41,9 @@ func (r *Key) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 var _ webhook.Validator = &Key{}
 
-var keyForceNewList = map[string]bool{}
+var keyForceNewList = map[string]bool{
+	"/public_key": true,
+}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *Key) ValidateCreate() error {

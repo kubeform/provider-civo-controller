@@ -52,8 +52,6 @@ type KeySpec struct {
 
 	ProviderRef core.LocalObjectReference `json:"providerRef" tf:"-"`
 
-	SecretRef *core.LocalObjectReference `json:"secretRef,omitempty" tf:"-"`
-
 	BackendRef *core.LocalObjectReference `json:"backendRef,omitempty" tf:"-"`
 }
 
@@ -66,7 +64,7 @@ type KeySpecResource struct {
 	// a string that will be the reference for the SSH key.
 	Name *string `json:"name" tf:"name"`
 	// a string containing the SSH public key.
-	PublicKey *string `json:"-" sensitive:"true" tf:"public_key"`
+	PublicKey *string `json:"publicKey" tf:"public_key"`
 }
 
 type KeyStatus struct {

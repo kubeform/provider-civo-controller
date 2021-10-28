@@ -43,21 +43,15 @@ import (
 	firewallv1alpha1 "kubeform.dev/provider-civo-api/apis/firewall/v1alpha1"
 	instancev1alpha1 "kubeform.dev/provider-civo-api/apis/instance/v1alpha1"
 	kubernetesv1alpha1 "kubeform.dev/provider-civo-api/apis/kubernetes/v1alpha1"
-	loadbalancerv1alpha1 "kubeform.dev/provider-civo-api/apis/loadbalancer/v1alpha1"
 	networkv1alpha1 "kubeform.dev/provider-civo-api/apis/network/v1alpha1"
-	snapshotv1alpha1 "kubeform.dev/provider-civo-api/apis/snapshot/v1alpha1"
 	sshv1alpha1 "kubeform.dev/provider-civo-api/apis/ssh/v1alpha1"
-	templatev1alpha1 "kubeform.dev/provider-civo-api/apis/template/v1alpha1"
 	volumev1alpha1 "kubeform.dev/provider-civo-api/apis/volume/v1alpha1"
 	controllersdns "kubeform.dev/provider-civo-controller/controllers/dns"
 	controllersfirewall "kubeform.dev/provider-civo-controller/controllers/firewall"
 	controllersinstance "kubeform.dev/provider-civo-controller/controllers/instance"
 	controllerskubernetes "kubeform.dev/provider-civo-controller/controllers/kubernetes"
-	controllersloadbalancer "kubeform.dev/provider-civo-controller/controllers/loadbalancer"
 	controllersnetwork "kubeform.dev/provider-civo-controller/controllers/network"
-	controllerssnapshot "kubeform.dev/provider-civo-controller/controllers/snapshot"
 	controllersssh "kubeform.dev/provider-civo-controller/controllers/ssh"
-	controllerstemplate "kubeform.dev/provider-civo-controller/controllers/template"
 	controllersvolume "kubeform.dev/provider-civo-controller/controllers/volume"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -365,23 +359,6 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "loadbalancer.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Loadbalancer",
-	}:
-		if err := (&controllersloadbalancer.LoadbalancerReconciler{
-			Client:   mgr.GetClient(),
-			Log:      ctrl.Log.WithName("controllers").WithName("Loadbalancer"),
-			Scheme:   mgr.GetScheme(),
-			Gvk:      gvk,
-			Provider: _provider,
-			Resource: _provider.ResourcesMap["civo_loadbalancer"],
-			TypeName: "civo_loadbalancer",
-		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Loadbalancer")
-			return err
-		}
-	case schema.GroupVersionKind{
 		Group:   "network.civo.kubeform.com",
 		Version: "v1alpha1",
 		Kind:    "Network",
@@ -399,23 +376,6 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "snapshot.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Snapshot",
-	}:
-		if err := (&controllerssnapshot.SnapshotReconciler{
-			Client:   mgr.GetClient(),
-			Log:      ctrl.Log.WithName("controllers").WithName("Snapshot"),
-			Scheme:   mgr.GetScheme(),
-			Gvk:      gvk,
-			Provider: _provider,
-			Resource: _provider.ResourcesMap["civo_snapshot"],
-			TypeName: "civo_snapshot",
-		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Snapshot")
-			return err
-		}
-	case schema.GroupVersionKind{
 		Group:   "ssh.civo.kubeform.com",
 		Version: "v1alpha1",
 		Kind:    "Key",
@@ -430,23 +390,6 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			TypeName: "civo_ssh_key",
 		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Key")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "template.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Template",
-	}:
-		if err := (&controllerstemplate.TemplateReconciler{
-			Client:   mgr.GetClient(),
-			Log:      ctrl.Log.WithName("controllers").WithName("Template"),
-			Scheme:   mgr.GetScheme(),
-			Gvk:      gvk,
-			Provider: _provider,
-			Resource: _provider.ResourcesMap["civo_template"],
-			TypeName: "civo_template",
-		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Template")
 			return err
 		}
 	case schema.GroupVersionKind{
@@ -557,15 +500,6 @@ func SetupWebhook(mgr manager.Manager, gvk schema.GroupVersionKind) error {
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "loadbalancer.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Loadbalancer",
-	}:
-		if err := (&loadbalancerv1alpha1.Loadbalancer{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Loadbalancer")
-			return err
-		}
-	case schema.GroupVersionKind{
 		Group:   "network.civo.kubeform.com",
 		Version: "v1alpha1",
 		Kind:    "Network",
@@ -575,30 +509,12 @@ func SetupWebhook(mgr manager.Manager, gvk schema.GroupVersionKind) error {
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "snapshot.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Snapshot",
-	}:
-		if err := (&snapshotv1alpha1.Snapshot{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Snapshot")
-			return err
-		}
-	case schema.GroupVersionKind{
 		Group:   "ssh.civo.kubeform.com",
 		Version: "v1alpha1",
 		Kind:    "Key",
 	}:
 		if err := (&sshv1alpha1.Key{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "Key")
-			return err
-		}
-	case schema.GroupVersionKind{
-		Group:   "template.civo.kubeform.com",
-		Version: "v1alpha1",
-		Kind:    "Template",
-	}:
-		if err := (&templatev1alpha1.Template{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Template")
 			return err
 		}
 	case schema.GroupVersionKind{

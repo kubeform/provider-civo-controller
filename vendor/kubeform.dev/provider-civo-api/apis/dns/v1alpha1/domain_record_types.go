@@ -58,11 +58,13 @@ type DomainRecordSpec struct {
 type DomainRecordSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// The account ID of this resource
 	// +optional
 	AccountID *string `json:"accountID,omitempty" tf:"account_id"`
+	// Timestamp when this resource was created
 	// +optional
 	CreatedAt *string `json:"createdAt,omitempty" tf:"created_at"`
-	// Id from domain name
+	// ID from domain name
 	DomainID *string `json:"domainID" tf:"domain_id"`
 	// The portion before the domain name (e.g. www) or an @ for the apex/root domain (you cannot use an A record with an amex/root domain)
 	Name *string `json:"name" tf:"name"`
@@ -73,6 +75,7 @@ type DomainRecordSpecResource struct {
 	Ttl *int64 `json:"ttl" tf:"ttl"`
 	// The choice of RR type from a, cname, mx or txt
 	Type *string `json:"type" tf:"type"`
+	// Timestamp when this resource was updated
 	// +optional
 	UpdatedAt *string `json:"updatedAt,omitempty" tf:"updated_at"`
 	// The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record

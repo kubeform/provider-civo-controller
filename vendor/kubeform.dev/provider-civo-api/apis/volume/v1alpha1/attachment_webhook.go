@@ -43,6 +43,7 @@ var _ webhook.Validator = &Attachment{}
 
 var attachmentForceNewList = map[string]bool{
 	"/instance_id": true,
+	"/region":      true,
 	"/volume_id":   true,
 }
 

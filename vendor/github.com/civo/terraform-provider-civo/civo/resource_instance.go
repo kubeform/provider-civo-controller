@@ -18,6 +18,7 @@ import (
 // and with it you can handle the instances created with Terraform
 func resourceInstance() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides a Civo instance resource. This can be used to create, modify, and delete instances.",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:        schema.TypeString,
@@ -28,7 +29,7 @@ func resourceInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				Description:  "A fully qualified domain name that should be set as the instance's hostname (required)",
+				Description:  "A fully qualified domain name that should be set as the instance's hostname",
 				ForceNew:     true,
 				ValidateFunc: utils.ValidateNameSize,
 			},
@@ -42,13 +43,13 @@ func resourceInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "g3.xsmall",
-				Description: "The name of the size, from the current list, e.g. g2.small (required)",
+				Description: "The name of the size, from the current list, e.g. g3.xsmall",
 			},
 			"public_ip_required": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "create",
-				Description: "This should be either none, create or `move_ip_from:intances_id` by default is create",
+				Description: "This should be either 'none' or 'create' (default: 'create')",
 			},
 			"network_id": {
 				Type:        schema.TypeString,
@@ -57,10 +58,19 @@ func resourceInstance() *schema.Resource {
 				Description: "This must be the ID of the network from the network listing (optional; default network used when not specified)",
 			},
 			"template": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The ID for the template to use to build the instance",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"template", "disk_image"},
+				Deprecated:   "\"template\" attribute is deprecated. Moving forward, please use \"disk_image\" attribute.",
+				Description:  "The ID for the template to use to build the instance",
+			},
+			"disk_image": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"template", "disk_image"},
+				Description:  "The ID for the disk image to use to build the instance",
 			},
 			"initial_user": {
 				Type:        schema.TypeString,
@@ -93,54 +103,61 @@ func resourceInstance() *schema.Resource {
 			"script": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Description: "the contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, " +
+				Description: "The contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, " +
 					"read/write/executable only by root and then will be executed at the end of the cloud initialization",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			// Computed resource
 			"cpu_cores": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Instance's CPU cores",
 			},
 			"ram_mb": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Instance's RAM (MB)",
 			},
 			"disk_gb": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Instance's disk (GB)",
 			},
 			"source_type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's source type",
 			},
 			"source_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's source ID",
 			},
 			"initial_password": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "Initial password for login",
 			},
 			"private_ip": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's private IP address",
 			},
 			"public_ip": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"pseudo_ip": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's public IP address",
 			},
 			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's status",
 			},
 			"created_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Timestamp when the instance was created",
 			},
 		},
 		Create: resourceInstanceCreate,
@@ -212,6 +229,16 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 			templateID = findTemplate.ID
 		}
 		config.TemplateID = templateID
+	}
+
+	if attr, ok := d.GetOk("disk_image"); ok {
+		diskImageID := ""
+		findDiskImage, err := apiClient.FindDiskImage(attr.(string))
+		if err != nil {
+			return fmt.Errorf("[ERR] failed to get the disk image: %s", err)
+		}
+		diskImageID = findDiskImage.ID
+		config.TemplateID = diskImageID
 	}
 
 	if attr, ok := d.GetOk("initial_user"); ok {
@@ -321,7 +348,6 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("public_ip", resp.PublicIP)
 	d.Set("network_id", resp.NetworkID)
 	d.Set("firewall_id", resp.FirewallID)
-	// d.Set("pseudo_ip", resp.PseudoIP)
 	d.Set("status", resp.Status)
 	d.Set("script", resp.Script)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
@@ -329,6 +355,10 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 
 	if _, ok := d.GetOk("template"); ok {
 		d.Set("template", d.Get("template").(string))
+	}
+
+	if _, ok := d.GetOk("disk_image"); ok {
+		d.Set("disk_image", d.Get("disk_image").(string))
 	}
 
 	return nil
@@ -364,7 +394,12 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 				return resource.RetryableError(fmt.Errorf("[ERR] expected instance to be resizing but was in state %s", resp.Status))
 			}
 
-			return resource.NonRetryableError(resourceInstanceRead(d, m))
+			err = resourceInstanceRead(d, m)
+			if err != nil {
+				return resource.NonRetryableError(err)
+			}
+
+			return nil
 		})
 	}
 

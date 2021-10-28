@@ -58,13 +58,15 @@ type NetworkSpec struct {
 type NetworkSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// If the network is default, this will be `true`
 	// +optional
 	Default *bool `json:"default,omitempty" tf:"default"`
 	// Name for the network
 	Label *string `json:"label" tf:"label"`
+	// The name of the network
 	// +optional
 	Name *string `json:"name,omitempty" tf:"name"`
-	// Name of the region
+	// The region of the network
 	// +optional
 	Region *string `json:"region,omitempty" tf:"region"`
 }
