@@ -36,98 +36,96 @@ type Data struct {
 	ResourceType string
 }
 
-var (
-	allJsonIt = map[schema.GroupVersionResource]Data{
-		{
-			Group:    "dns.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "domainnames",
-		}: {
-			JsonIt:       controllers.GetJSONItr(dnsv1alpha1.GetEncoder(), dnsv1alpha1.GetDecoder()),
-			ResourceType: "civo_dns_domain_name",
-		},
-		{
-			Group:    "dns.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "domainrecords",
-		}: {
-			JsonIt:       controllers.GetJSONItr(dnsv1alpha1.GetEncoder(), dnsv1alpha1.GetDecoder()),
-			ResourceType: "civo_dns_domain_record",
-		},
-		{
-			Group:    "firewall.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "firewalls",
-		}: {
-			JsonIt:       controllers.GetJSONItr(firewallv1alpha1.GetEncoder(), firewallv1alpha1.GetDecoder()),
-			ResourceType: "civo_firewall",
-		},
-		{
-			Group:    "firewall.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "rules",
-		}: {
-			JsonIt:       controllers.GetJSONItr(firewallv1alpha1.GetEncoder(), firewallv1alpha1.GetDecoder()),
-			ResourceType: "civo_firewall_rule",
-		},
-		{
-			Group:    "instance.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "instances",
-		}: {
-			JsonIt:       controllers.GetJSONItr(instancev1alpha1.GetEncoder(), instancev1alpha1.GetDecoder()),
-			ResourceType: "civo_instance",
-		},
-		{
-			Group:    "kubernetes.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clusters",
-		}: {
-			JsonIt:       controllers.GetJSONItr(kubernetesv1alpha1.GetEncoder(), kubernetesv1alpha1.GetDecoder()),
-			ResourceType: "civo_kubernetes_cluster",
-		},
-		{
-			Group:    "kubernetes.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "nodepools",
-		}: {
-			JsonIt:       controllers.GetJSONItr(kubernetesv1alpha1.GetEncoder(), kubernetesv1alpha1.GetDecoder()),
-			ResourceType: "civo_kubernetes_node_pool",
-		},
-		{
-			Group:    "network.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "networks",
-		}: {
-			JsonIt:       controllers.GetJSONItr(networkv1alpha1.GetEncoder(), networkv1alpha1.GetDecoder()),
-			ResourceType: "civo_network",
-		},
-		{
-			Group:    "ssh.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "keys",
-		}: {
-			JsonIt:       controllers.GetJSONItr(sshv1alpha1.GetEncoder(), sshv1alpha1.GetDecoder()),
-			ResourceType: "civo_ssh_key",
-		},
-		{
-			Group:    "volume.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "volumes",
-		}: {
-			JsonIt:       controllers.GetJSONItr(volumev1alpha1.GetEncoder(), volumev1alpha1.GetDecoder()),
-			ResourceType: "civo_volume",
-		},
-		{
-			Group:    "volume.civo.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "attachments",
-		}: {
-			JsonIt:       controllers.GetJSONItr(volumev1alpha1.GetEncoder(), volumev1alpha1.GetDecoder()),
-			ResourceType: "civo_volume_attachment",
-		},
-	}
-)
+var allJsonIt = map[schema.GroupVersionResource]Data{
+	{
+		Group:    "dns.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "domainnames",
+	}: {
+		JsonIt:       controllers.GetJSONItr(dnsv1alpha1.GetEncoder(), dnsv1alpha1.GetDecoder()),
+		ResourceType: "civo_dns_domain_name",
+	},
+	{
+		Group:    "dns.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "domainrecords",
+	}: {
+		JsonIt:       controllers.GetJSONItr(dnsv1alpha1.GetEncoder(), dnsv1alpha1.GetDecoder()),
+		ResourceType: "civo_dns_domain_record",
+	},
+	{
+		Group:    "firewall.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "firewalls",
+	}: {
+		JsonIt:       controllers.GetJSONItr(firewallv1alpha1.GetEncoder(), firewallv1alpha1.GetDecoder()),
+		ResourceType: "civo_firewall",
+	},
+	{
+		Group:    "firewall.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "rules",
+	}: {
+		JsonIt:       controllers.GetJSONItr(firewallv1alpha1.GetEncoder(), firewallv1alpha1.GetDecoder()),
+		ResourceType: "civo_firewall_rule",
+	},
+	{
+		Group:    "instance.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "instances",
+	}: {
+		JsonIt:       controllers.GetJSONItr(instancev1alpha1.GetEncoder(), instancev1alpha1.GetDecoder()),
+		ResourceType: "civo_instance",
+	},
+	{
+		Group:    "kubernetes.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clusters",
+	}: {
+		JsonIt:       controllers.GetJSONItr(kubernetesv1alpha1.GetEncoder(), kubernetesv1alpha1.GetDecoder()),
+		ResourceType: "civo_kubernetes_cluster",
+	},
+	{
+		Group:    "kubernetes.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "nodepools",
+	}: {
+		JsonIt:       controllers.GetJSONItr(kubernetesv1alpha1.GetEncoder(), kubernetesv1alpha1.GetDecoder()),
+		ResourceType: "civo_kubernetes_node_pool",
+	},
+	{
+		Group:    "network.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "networks",
+	}: {
+		JsonIt:       controllers.GetJSONItr(networkv1alpha1.GetEncoder(), networkv1alpha1.GetDecoder()),
+		ResourceType: "civo_network",
+	},
+	{
+		Group:    "ssh.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "keys",
+	}: {
+		JsonIt:       controllers.GetJSONItr(sshv1alpha1.GetEncoder(), sshv1alpha1.GetDecoder()),
+		ResourceType: "civo_ssh_key",
+	},
+	{
+		Group:    "volume.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "volumes",
+	}: {
+		JsonIt:       controllers.GetJSONItr(volumev1alpha1.GetEncoder(), volumev1alpha1.GetDecoder()),
+		ResourceType: "civo_volume",
+	},
+	{
+		Group:    "volume.civo.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "attachments",
+	}: {
+		JsonIt:       controllers.GetJSONItr(volumev1alpha1.GetEncoder(), volumev1alpha1.GetDecoder()),
+		ResourceType: "civo_volume_attachment",
+	},
+}
 
 func getJsonItAndResType(gvr schema.GroupVersionResource) Data {
 	return allJsonIt[gvr]
