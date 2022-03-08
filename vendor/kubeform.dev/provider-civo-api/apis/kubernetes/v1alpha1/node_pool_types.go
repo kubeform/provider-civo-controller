@@ -65,7 +65,7 @@ type NodePoolSpecResource struct {
 	NumTargetNodes *int64 `json:"numTargetNodes,omitempty" tf:"num_target_nodes"`
 	// The region of the node pool, has to match that of the cluster
 	Region *string `json:"region" tf:"region"`
-	// the size of each node (optional, the default is currently g3.k3s.medium)
+	// the size of each node (optional, the default is currently g4s.kube.medium)
 	// +optional
 	TargetNodesSize *string `json:"targetNodesSize,omitempty" tf:"target_nodes_size"`
 }

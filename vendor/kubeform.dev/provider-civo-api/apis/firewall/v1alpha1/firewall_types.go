@@ -58,6 +58,9 @@ type FirewallSpec struct {
 type FirewallSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// The create rules flag is used to create the default firewall rules, if is not defined will be set to true
+	// +optional
+	CreateDefaultRules *bool `json:"createDefaultRules,omitempty" tf:"create_default_rules"`
 	// The firewall name
 	Name *string `json:"name" tf:"name"`
 	// The firewall network, if is not defined we use the default network

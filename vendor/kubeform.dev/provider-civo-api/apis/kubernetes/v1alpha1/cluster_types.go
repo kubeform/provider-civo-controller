@@ -108,6 +108,9 @@ type ClusterSpecPools struct {
 	// Number of nodes in the nodepool
 	// +optional
 	Count *int64 `json:"count,omitempty" tf:"count"`
+	// Nodepool ID
+	// +optional
+	ID *string `json:"ID,omitempty" tf:"id"`
 	// Instance names in the nodepool
 	// +optional
 	InstanceNames []string `json:"instanceNames,omitempty" tf:"instance_names"`
@@ -143,6 +146,9 @@ type ClusterSpecResource struct {
 	// Comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. Application names are case-sensitive; the available applications can be listed with the Civo CLI: 'civo kubernetes applications ls'. If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik. For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'.
 	// +optional
 	Applications *string `json:"applications,omitempty" tf:"applications"`
+	// The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
+	// +optional
+	Cni *string `json:"cni,omitempty" tf:"cni"`
 	// The timestamp when the cluster was created
 	// +optional
 	CreatedAt *string `json:"createdAt,omitempty" tf:"created_at"`
@@ -187,7 +193,7 @@ type ClusterSpecResource struct {
 	// Space separated list of tags, to be used freely as required
 	// +optional
 	Tags *string `json:"tags,omitempty" tf:"tags"`
-	// The size of each node (optional, the default is currently g3.k3s.medium)
+	// The size of each node (optional, the default is currently g4s.kube.medium)
 	// +optional
 	TargetNodesSize *string `json:"targetNodesSize,omitempty" tf:"target_nodes_size"`
 }

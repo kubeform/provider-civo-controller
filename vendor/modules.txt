@@ -123,10 +123,10 @@ github.com/bgentry/speakeasy
 github.com/bmatcuk/doublestar
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
-# github.com/civo/civogo v0.2.52
+# github.com/civo/civogo v0.2.70
 github.com/civo/civogo
 github.com/civo/civogo/utils
-# github.com/civo/terraform-provider-civo v1.0.2
+# github.com/civo/terraform-provider-civo v1.0.13
 ## explicit
 github.com/civo/terraform-provider-civo/civo
 github.com/civo/terraform-provider-civo/internal/datalist
@@ -235,8 +235,6 @@ github.com/gophercloud/utils/client
 github.com/gophercloud/utils/env
 github.com/gophercloud/utils/openstack/clientconfig
 github.com/gophercloud/utils/terraform/auth
-# github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
-github.com/gorhill/cronexpr
 # github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7
 github.com/gregjones/httpcache
 # github.com/hashicorp/aws-sdk-go-base v0.7.1
@@ -608,7 +606,7 @@ golang.org/x/oauth2/google/internal/externalaccount
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sys v0.0.0-20210817190340-bfb29a6856f2
+# golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e
 golang.org/x/sys/cpu
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
@@ -1300,7 +1298,7 @@ kmodules.xyz/resource-metrics/api
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
 kubeform.dev/apimachinery/pkg/util
-# kubeform.dev/provider-civo-api v0.4.1-0.20220126210513-e6fc5a7e31f0
+# kubeform.dev/provider-civo-api v0.4.1-0.20220308115706-6ebf53385ee2
 ## explicit
 kubeform.dev/provider-civo-api/api/provider
 kubeform.dev/provider-civo-api/apis/dns
