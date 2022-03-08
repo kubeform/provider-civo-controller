@@ -58,11 +58,12 @@ type RuleSpec struct {
 type RuleSpecResource struct {
 	ID string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// the action of the rule can be allow or deny
+	Action *string `json:"action" tf:"action"`
 	// The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
 	Cidr []string `json:"cidr" tf:"cidr"`
-	// Will this rule affect ingress traffic (only `ingress` is supported now)
-	// +optional
-	Direction *string `json:"direction,omitempty" tf:"direction"`
+	// The direction of the rule can be ingress or egress
+	Direction *string `json:"direction" tf:"direction"`
 	// The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)
 	// +optional
 	EndPort *string `json:"endPort,omitempty" tf:"end_port"`

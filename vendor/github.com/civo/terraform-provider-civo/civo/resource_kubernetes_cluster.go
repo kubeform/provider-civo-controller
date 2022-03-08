@@ -49,13 +49,20 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "The size of each node (optional, the default is currently g3.k3s.medium)",
+				Description: "The size of each node (optional, the default is currently g4s.kube.medium)",
 			},
 			"kubernetes_version": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				Description: "The version of k3s to install (optional, the default is currently the latest available)",
+			},
+			"cni": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				Description:  "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
+				ValidateFunc: utils.ValidateCNIName,
 			},
 			"tags": {
 				Type:        schema.TypeString,
@@ -185,6 +192,11 @@ func nodePoolSchema() *schema.Schema {
 		Computed: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Nodepool ID",
+				},
 				"count": {
 					Type:        schema.TypeInt,
 					Computed:    true,
@@ -280,7 +292,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	if attr, ok := d.GetOk("target_nodes_size"); ok {
 		config.TargetNodesSize = attr.(string)
 	} else {
-		config.TargetNodesSize = "g3.k3s.medium"
+		config.TargetNodesSize = "g4s.kube.medium"
 	}
 
 	if attr, ok := d.GetOk("kubernetes_version"); ok {
@@ -291,6 +303,10 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 		config.Tags = attr.(string)
 	} else {
 		config.Tags = ""
+	}
+
+	if attr, ok := d.GetOk("cni"); ok {
+		config.CNIPlugin = attr.(string)
 	}
 
 	if attr, ok := d.GetOk("applications"); ok {
@@ -375,6 +391,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("num_target_nodes", resp.NumTargetNode)
 	d.Set("target_nodes_size", resp.TargetNodeSize)
 	d.Set("kubernetes_version", resp.KubernetesVersion)
+	d.Set("cni", resp.CNIPlugin)
 	d.Set("tags", strings.Join(resp.Tags, " ")) // space separated tags
 	d.Set("status", resp.Status)
 	d.Set("ready", resp.Ready)
@@ -479,7 +496,7 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"SCALING"},
+		Pending: []string{"BUILDING"},
 		Target:  []string{"ACTIVE"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.GetKubernetesCluster(d.Id())
@@ -543,6 +560,7 @@ func flattenInstances(instances []civogo.KubernetesInstance) []interface{} {
 
 // function to flatten all instances inside the cluster
 func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
+
 	if cluster.Pools == nil {
 		return nil
 	}
@@ -552,14 +570,12 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 		flattenedPoolInstance := make([]interface{}, 0)
 		for _, v := range pool.Instances {
 
-			instanceData := searchInstance(cluster.Instances, v.Hostname)
-
 			rawPoolInstance := map[string]interface{}{
 				"hostname":  v.Hostname,
 				"size":      pool.Size,
-				"cpu_cores": instanceData.CPUCores,
-				"ram_mb":    instanceData.RAMMegabytes,
-				"disk_gb":   instanceData.DiskGigabytes,
+				"cpu_cores": v.CPUCores,
+				"ram_mb":    v.RAMMegabytes,
+				"disk_gb":   v.DiskGigabytes,
 				"status":    v.Status,
 				"tags":      v.Tags,
 			}
@@ -601,13 +617,4 @@ func flattenInstalledApplication(apps []civogo.KubernetesInstalledApplication) [
 	}
 
 	return flattenedInstalledApplication
-}
-
-func searchInstance(instanceList []civogo.KubernetesInstance, hostname string) civogo.KubernetesInstance {
-	for _, v := range instanceList {
-		if strings.Contains(v.Hostname, hostname) {
-			return v
-		}
-	}
-	return civogo.KubernetesInstance{}
 }

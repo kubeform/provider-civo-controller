@@ -31,7 +31,10 @@ func dataSourceInstancesSize() *schema.Resource {
 		GetRecords:          getInstancesSizes,
 	}
 
-	return datalist.NewResource(dataListConfig)
+	instanceSizeResource := datalist.NewResource(dataListConfig)
+	instanceSizeResource.DeprecationMessage = "Use the civo_size datasource instead"
+
+	return instanceSizeResource
 
 }
 
@@ -47,12 +50,16 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 	sizeList := []SizeList{}
 
 	for _, v := range partialSizes {
+		if !v.Selectable {
+			continue
+		}
+
 		typeName := ""
 
 		switch {
 		case strings.Contains(v.Name, "db"):
 			typeName = "database"
-		case strings.Contains(v.Name, "k3s"):
+		case strings.Contains(v.Name, "kube") || strings.Contains(v.Name, "k3s"):
 			typeName = "kubernetes"
 		default:
 			typeName = "instance"

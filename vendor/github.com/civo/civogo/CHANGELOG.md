@@ -1,4 +1,16 @@
 
+0.2.57
+=============
+2021-11-02
+
+* Remove implicit call to templates (#63) (ff81332)
+
+0.2.54
+=============
+2021-09-27
+
+* Provide region when reboot, stop and start instance (#62) (e04b7763)
+
 0.2.52
 =============
 2021-08-30

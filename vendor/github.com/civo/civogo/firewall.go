@@ -9,11 +9,13 @@ import (
 
 // Firewall represents list of rule in Civo's infrastructure
 type Firewall struct {
-	ID             string `json:"id"`
-	Name           string `json:"name,omitempty"`
-	RulesCount     int    `json:"rules_count,omitempty"`
-	InstancesCount int    `json:"instances_count,omitempty"`
-	NetworkID      string `json:"network_id,omitempty"`
+	ID                string `json:"id"`
+	Name              string `json:"name,omitempty"`
+	RulesCount        int    `json:"rules_count,omitempty"`
+	InstanceCount     int    `json:"instance_count"`
+	ClusterCount      int    `json:"cluster_count"`
+	LoadBalancerCount int    `json:"loadbalancer_count"`
+	NetworkID         string `json:"network_id,omitempty"`
 }
 
 // FirewallResult is the response from the Civo Firewall APIs
@@ -33,6 +35,7 @@ type FirewallRule struct {
 	EndPort    string   `json:"end_port"`
 	Cidr       []string `json:"cidr"`
 	Direction  string   `json:"direction"`
+	Action     string   `json:"action"`
 	Label      string   `json:"label,omitempty"`
 }
 
@@ -45,6 +48,7 @@ type FirewallRuleConfig struct {
 	EndPort    string   `json:"end_port"`
 	Cidr       []string `json:"cidr"`
 	Direction  string   `json:"direction"`
+	Action     string   `json:"action"`
 	Label      string   `json:"label,omitempty"`
 }
 
@@ -53,6 +57,8 @@ type FirewallConfig struct {
 	Name      string `json:"name"`
 	Region    string `json:"region"`
 	NetworkID string `json:"network_id"`
+	// CreateRules if not send the value will be nil, that mean the default rules will be created
+	CreateRules *bool `json:"create_rules,omitempty"`
 }
 
 // ListFirewalls returns all firewall owned by the calling API account
@@ -105,8 +111,8 @@ func (c *Client) FindFirewall(search string) (*Firewall, error) {
 }
 
 // NewFirewall creates a new firewall record
-func (c *Client) NewFirewall(name, networkid string) (*FirewallResult, error) {
-	fw := FirewallConfig{Name: name, Region: c.Region, NetworkID: networkid}
+func (c *Client) NewFirewall(name, networkid string, CreateRules *bool) (*FirewallResult, error) {
+	fw := FirewallConfig{Name: name, Region: c.Region, NetworkID: networkid, CreateRules: CreateRules}
 	body, err := c.SendPostRequest("/v2/firewalls", fw)
 	if err != nil {
 		return nil, decodeError(err)

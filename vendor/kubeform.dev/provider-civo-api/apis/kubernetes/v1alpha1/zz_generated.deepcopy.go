@@ -216,6 +216,11 @@ func (in *ClusterSpecPools) DeepCopyInto(out *ClusterSpecPools) {
 		*out = new(int64)
 		**out = **in
 	}
+	if in.ID != nil {
+		in, out := &in.ID, &out.ID
+		*out = new(string)
+		**out = **in
+	}
 	if in.InstanceNames != nil {
 		in, out := &in.InstanceNames, &out.InstanceNames
 		*out = make([]string, len(*in))
@@ -307,6 +312,11 @@ func (in *ClusterSpecResource) DeepCopyInto(out *ClusterSpecResource) {
 	}
 	if in.Applications != nil {
 		in, out := &in.Applications, &out.Applications
+		*out = new(string)
+		**out = **in
+	}
+	if in.Cni != nil {
+		in, out := &in.Cni, &out.Cni
 		*out = new(string)
 		**out = **in
 	}

@@ -2,6 +2,8 @@ package civo
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,25 +23,26 @@ func Provider() *schema.Provider {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_REGION", ""),
 				Description: "If region is not set, then no region will be used and them you need expensify in every resource even if you expensify here you can overwrite in a resource.",
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"civo_template":           dataSourceTemplate(),
+			// "civo_template":           dataSourceTemplate(),
 			"civo_disk_image":         dataSourceDiskImage(),
 			"civo_kubernetes_version": dataSourceKubernetesVersion(),
 			"civo_kubernetes_cluster": dataSourceKubernetesCluster(),
 			"civo_instances_size":     dataSourceInstancesSize(),
+			"civo_size":               dataSourceSize(),
 			"civo_instances":          dataSourceInstances(),
 			"civo_instance":           dataSourceInstance(),
 			"civo_dns_domain_name":    dataSourceDNSDomainName(),
 			"civo_dns_domain_record":  dataSourceDNSDomainRecord(),
 			"civo_network":            dataSourceNetwork(),
 			"civo_volume":             dataSourceVolume(),
-			// "civo_loadbalancer":       dataSourceLoadBalancer(),
-			"civo_ssh_key": dataSourceSSHKey(),
+			"civo_firewall":           dataSourceFirewall(),
+			"civo_loadbalancer":       dataSourceLoadBalancer(),
+			"civo_ssh_key":            dataSourceSSHKey(),
 			// "civo_snapshot":           dataSourceSnapshot(),
 			"civo_region": dataSourceRegion(),
 		},
@@ -77,10 +80,24 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, fmt.Errorf("[ERR] token not found")
 	}
 
-	client, err := civogo.NewClient(tokenValue, regionValue)
+	var client *civogo.Client
+	var err error
+
+	apiURL, envExists := os.LookupEnv("CIVO_API_URL")
+	if envExists && apiURL != "" {
+		client, err = civogo.NewClientWithURL(tokenValue, apiURL, regionValue)
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
+		return client, nil
+	}
+
+	client, err = civogo.NewClient(tokenValue, regionValue)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[DEBUG] Civo API URL: %s\n", "https://api.civo.com")
 	return client, nil
 
 }

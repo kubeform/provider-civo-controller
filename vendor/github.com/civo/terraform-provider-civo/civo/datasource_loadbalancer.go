@@ -7,7 +7,6 @@ import (
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Data source to get from the api a specific Load Balancer
@@ -21,95 +20,95 @@ func dataSourceLoadBalancer() *schema.Resource {
 		Read: dataSourceLoadBalancerRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.NoZeroValues,
-				ExactlyOneOf: []string{"id", "hostname"},
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The id of the load balancer to retrieve (You can find this id from service annotations 'kubernetes.civo.com/loadbalancer-id')",
 			},
-			"hostname": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.NoZeroValues,
-				ExactlyOneOf: []string{"id", "hostname"},
-				Description:  "The hostname of the load balancer",
+			"name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the load balancer (You can find this name from service annotations 'kubernetes.civo.com/loadbalancer-name')",
 			},
-			"region": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.NoZeroValues,
-				Description:  "The region where load balancer is running",
-			},
-			// Computed resource
-			"protocol": {
+			"public_ip": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The protocol used",
+				Description: "The public ip of the load balancer",
 			},
-			"tls_certificate": {
+			"algorithm": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "If is set will be returned",
+				Description: "The algorithm used by the load balancer",
 			},
-			"tls_key": {
+			"external_traffic_policy": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "If is set will be returned",
+				Description: "The external traffic policy of the load balancer",
 			},
-			"port": {
+			"session_affinity": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The session affinity of the load balancer",
+			},
+			"session_affinity_config_timeout": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The port set in the configuration",
+				Description: "The session affinity config timeout of the load balancer",
 			},
-			"max_request_size": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "The max request size set in the configuration",
-			},
-			"policy": {
+			"enable_proxy_protocol": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The policy set in the load balancer",
+				Description: "The enabled proxy protocol of the load balancer",
 			},
-			"health_check_path": {
+			"private_ip": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The path to check the health of the backend",
+				Description: "The private ip of the load balancer",
 			},
-			"fail_timeout": {
-				Type:        schema.TypeInt,
+			"firewall_id": {
+				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The wait time until the backend is marked as a failure",
+				Description: "The firewall id of the load balancer",
 			},
-			"max_conns": {
-				Type:        schema.TypeInt,
+			"cluster_id": {
+				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "How many concurrent connections can each backend handle",
+				Description: "The cluster id of the load balancer",
 			},
-			"ignore_invalid_backend_tls": {
-				Type:        schema.TypeBool,
+			"state": {
+				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Should self-signed/invalid certificates be ignored from the backend servers",
+				Description: "The state of the load balancer",
 			},
-			"backend": {
+			"backends": {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"instance_id": {
+						"ip": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The instance ID",
+							Description: "The ip of the backend",
 						},
 						"protocol": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The protocol used in the configuration",
+							Description: "The protocol of the backend",
 						},
-						"port": {
+						"source_port": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The port set in the configuration",
+							Description: "The source port of the backend",
+						},
+						"target_port": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The target port of the backend",
+						},
+						"health_check_port": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The health check port of the backend",
 						},
 					},
 				},
@@ -128,12 +127,12 @@ func dataSourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
 
 	var searchBy string
 
-	if id, ok := d.GetOk("id"); ok {
+	if name, ok := d.GetOk("name"); ok {
+		log.Printf("[INFO] Getting the LoadBalancer by name")
+		searchBy = name.(string)
+	} else if id, ok := d.GetOk("id"); ok {
 		log.Printf("[INFO] Getting the LoadBalancer by id")
 		searchBy = id.(string)
-	} else if hostname, ok := d.GetOk("hostname"); ok {
-		log.Printf("[INFO] Getting the LoadBalancer by hostname")
-		searchBy = hostname.(string)
 	}
 
 	lb, err := apiClient.FindLoadBalancer(searchBy)
@@ -142,21 +141,43 @@ func dataSourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(lb.ID)
-	d.Set("hostname", lb.Hostname)
-	d.Set("protocol", lb.Protocol)
-	d.Set("tls_certificate", lb.TLSCertificate)
-	d.Set("tls_key", lb.TLSKey)
-	d.Set("port", lb.Port)
-	d.Set("max_request_size", lb.MaxRequestSize)
-	d.Set("policy", lb.Policy)
-	d.Set("health_check_path", lb.HealthCheckPath)
-	d.Set("fail_timeout", lb.FailTimeout)
-	d.Set("max_conns", lb.MaxConns)
-	d.Set("ignore_invalid_backend_tls", lb.IgnoreInvalidBackendTLS)
+	d.Set("name", lb.Name)
+	d.Set("public_ip", lb.PublicIP)
+	d.Set("algorithm", lb.Algorithm)
+	d.Set("external_traffic_policy", lb.ExternalTrafficPolicy)
+	d.Set("session_affinity", lb.SessionAffinity)
+	d.Set("session_affinity_config_timeout", lb.SessionAffinityConfigTimeout)
+	d.Set("enable_proxy_protocol", lb.EnableProxyProtocol)
+	d.Set("private_ip", lb.PrivateIP)
+	d.Set("firewall_id", lb.FirewallID)
+	d.Set("cluster_id", lb.ClusterID)
+	d.Set("state", lb.State)
 
-	if err := d.Set("backend", flattenLoadBalancerBackend(lb.Backends)); err != nil {
-		return fmt.Errorf("[ERR] error retrieving the backend for load balancer error: %#v", err)
+	if err := d.Set("backends", flattenLoadBalancerBackend(lb.Backends)); err != nil {
+		return fmt.Errorf("[ERR] error retrieving the backends for load balancer error: %#v", err)
 	}
 
 	return nil
+}
+
+// function to flatten the load balancer backend when is coming from the api
+func flattenLoadBalancerBackend(backend []civogo.LoadBalancerBackend) []interface{} {
+	if backend == nil {
+		return nil
+	}
+
+	flattenedBackend := make([]interface{}, len(backend))
+	for i, back := range backend {
+		rawRule := map[string]interface{}{
+			"ip":                back.IP,
+			"protocol":          back.Protocol,
+			"source_port":       back.SourcePort,
+			"target_port":       back.TargetPort,
+			"health_check_port": back.HealthCheckPort,
+		}
+
+		flattenedBackend[i] = rawRule
+	}
+
+	return flattenedBackend
 }

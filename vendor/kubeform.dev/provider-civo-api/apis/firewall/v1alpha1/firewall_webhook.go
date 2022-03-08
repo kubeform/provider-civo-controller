@@ -41,7 +41,10 @@ func (r *Firewall) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 var _ webhook.Validator = &Firewall{}
 
-var firewallForceNewList = map[string]bool{}
+var firewallForceNewList = map[string]bool{
+	"/create_default_rules": true,
+	"/network_id":           true,
+}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *Firewall) ValidateCreate() error {
@@ -86,7 +89,7 @@ func (r *Firewall) ValidateUpdate(old runtime.Object) error {
 		return err
 	}
 
-	for key := range firewallForceNewList {
+	for key, _ := range firewallForceNewList {
 		keySplit := strings.Split(key, "/*")
 		length := len(keySplit)
 		checkIfAnyDif := false
